@@ -11,7 +11,7 @@ _start:
     // register, first 2 bits) is not 0
     mrc p15, #0, r1, c0, c0, #5
     and r1, r1, #3
-    cmp r1, #2
+    cmp r1, #0
     bne io_halt 
 
     // Setup the stack.
