@@ -17,7 +17,7 @@ reset:
 
     // set vector address.
     ldr r0, =vector
-    mcR P15, 0, r0, c12, c0, 0
+    mcr P15, 0, r0, c12, c0, 0
 
     // save CPSR.
     mrs r0, cpsr
