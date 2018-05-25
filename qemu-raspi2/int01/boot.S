@@ -9,7 +9,7 @@ reset:
     // disable core0,1,2.
     mrc p15, #0, r1, c0, c0, #5
     and r1, r1, #3
-    cmp r1, #3
+    cmp r1, #0
     bne io_halt 
 
     // set vector address.

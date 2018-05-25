@@ -9,10 +9,10 @@ static inline void io_halt(void)
     asm volatile ("wfi");
 }
 
-#define UART0_DR   ((volatile unsigned int*)(0x3F201000))
-#define UART0_FR   ((volatile unsigned int*)(0x3F201018))
-#define UART0_IMSC ((volatile unsigned int*)(0x3F201038))
-#define UART0_MIS  ((volatile unsigned int*)(0x3F201040))
+#define UART0_DR   ((volatile uint32_t *)(0x3F201000))
+#define UART0_FR   ((volatile uint32_t *)(0x3F201018))
+#define UART0_IMSC ((volatile uint32_t *)(0x3F201038))
+#define UART0_MIS  ((volatile uint32_t *)(0x3F201040))
 
 void uart_putc(unsigned char c)
 {
@@ -20,7 +20,7 @@ void uart_putc(unsigned char c)
     while (*UART0_FR & (1 << 5)) { }
     *UART0_DR = c;
 }
- 
+
 void uart_puts(const char* str)
 {
     for (size_t i = 0; str[i] != '\0'; i ++)
@@ -40,10 +40,10 @@ void c_irq_handler(void)
     if (*CORE0_INTERRUPT_SOURCE & (1 << 8)) {
         if (*IRQ_PEND2 & (1 << 25)) {
             if (*UART0_MIS & (1 << 4)) { 
- 	            c = (unsigned char) *UART0_DR; // read for clear tx interrupt.
+                c = (unsigned char) *UART0_DR; // read for clear tx interrupt.
                 enable_irq();
                 uart_putc(c);
- 	            uart_puts(" c_irq_handler\n");
+                uart_puts(" c_irq_handler\n");
                 return;
             }
         }

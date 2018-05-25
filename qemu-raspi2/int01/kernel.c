@@ -5,57 +5,65 @@ extern void io_halt(void);
 extern void enable_irq(void);
 extern void disable_irq(void);
 
-#define DR   (*(volatile unsigned int *)0x3F201000)
-#define FR   (*(volatile unsigned int *)0x3F201018)
-#define IMSC (*(volatile unsigned int *)0x3F201038)
+#define UART0_DR   ((volatile uint32_t *)(0x3F201000))
+#define UART0_FR   ((volatile uint32_t *)(0x3F201018))
+#define UART0_IMSC ((volatile uint32_t *)(0x3F201038))
+#define UART0_MIS  ((volatile uint32_t *)(0x3F201040))
 
-void uart_putc(char ch)
+void uart_putc(unsigned char c)
 {
-	while (FR & (1U << 5));
-	DR = (unsigned int)ch;
+    // Wait for UART to become ready to transmit.
+    while (*UART0_FR & (1 << 5)) { }
+    *UART0_DR = c;
 }
 
-void uart_puts(char *str)
+void uart_puts(const char* str)
 {
-	while (*str != '\0')
-		uart_putc(*str++);
+    for (size_t i = 0; str[i] != '\0'; i ++)
+        uart_putc((unsigned char)str[i]);
 }
 
-#define IRQ_PEND2    (*(volatile unsigned int *) 0x3F00B208)
-#define IRQ_ENABLE2  (*(volatile unsigned int *) 0x3F00B214)
-#define IRQ_DISABLE2 (*(volatile unsigned int *) 0x3F00B220)
-#define GPU_INTERRUPTS_ROUTING (*(volatile unsigned int *) 0x4000000C)
-
-void kernel_main(void)
-{
-    // enable UART TX interrupt.
-    IMSC = 0x010;
-
-    // enable UART interrupt.
-    IRQ_ENABLE2 = 1 << 25;
-
-    // IRQ routeing to CORE3.
-    GPU_INTERRUPTS_ROUTING = 0x03;
-
-    // enable IRQ
-    enable_irq();
-
-	uart_puts("kernel_main\n");
-    while (1)
-        io_halt();
-}
+#define IRQ_PEND2   ((volatile uint32_t *)(0x3F00B208))
+#define IRQ_ENABLE2 ((volatile uint32_t *)(0x3F00B214))
+#define GPU_INTERRUPTS_ROUTING ((volatile uint32_t *)(0x4000000C))
+#define CORE0_INTERRUPT_SOURCE ((volatile uint32_t *)(0x40000060))
 
 void c_irq_handler(void)
 {
+    char c;
     disable_irq();
-    if (IRQ_PEND2 & (1 << 25)) {
-        IRQ_DISABLE2 = 1 << 25;
-
-	    uart_putc((char) DR); // read for clear tx interrupt.
-	    uart_puts(" c_irq_handler\n");
-
-        IRQ_ENABLE2 = 1 << 25;
+    // check inteerupt source
+    if (*CORE0_INTERRUPT_SOURCE & (1 << 8)) {
+        if (*IRQ_PEND2 & (1 << 25)) {
+            if (*UART0_MIS & (1 << 4)) {
+                c = (unsigned char) *UART0_DR; // read for clear tx interrupt.
+                enable_irq();
+                uart_putc(c);
+                uart_puts(" c_irq_handler\n");
+                return;
+            }
+        }
     }
     enable_irq();
     return;
+}
+
+
+void kernel_main(void)
+{
+    uart_puts("int01\n");
+
+    // enable UART RX interrupt.
+    *UART0_IMSC = 1 << 4;
+
+    // UART interrupt routing.
+    *IRQ_ENABLE2 = 1 << 25;
+
+    // IRQ routeing to CORE0.
+    *GPU_INTERRUPTS_ROUTING = 0x00;
+
+    enable_irq();
+
+    while (1)
+        io_halt();
 }
