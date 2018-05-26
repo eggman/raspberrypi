@@ -6,8 +6,8 @@ static inline void io_halt(void)
     asm volatile ("wfi");
 }
 
-#define UART0_DR ((volatile unsigned int*)(0x3F201000))
-#define UART0_FR ((volatile unsigned int*)(0x3F201018))
+#define UART0_DR ((volatile uint32_t *)(0x3F201000))
+#define UART0_FR ((volatile uint32_t *)(0x3F201018))
 
 void uart_putc(uint8_t c)
 {
@@ -64,33 +64,40 @@ void wait_msec(uint32_t num)
     (void) num;
 }
 
-#define SDCMD         ((volatile unsigned int*)(0x3F202000))
-#define SDARG         ((volatile unsigned int*)(0x3F202004))
-#define SDTOUT        ((volatile unsigned int*)(0x3F202008))
-#define SDCDIV        ((volatile unsigned int*)(0x3F20200C))
-#define SDRSP0        ((volatile unsigned int*)(0x3F202010))
-#define SDRSP1        ((volatile unsigned int*)(0x3F202014))
-#define SDRSP2        ((volatile unsigned int*)(0x3F202018))
-#define SDRSP3        ((volatile unsigned int*)(0x3F20201C))
-#define SDHSTS        ((volatile unsigned int*)(0x3F202020))
-#define SDVDD         ((volatile unsigned int*)(0x3F202030))
-#define SDEDM         ((volatile unsigned int*)(0x3F202034))
+#define SDCMD         ((volatile uint32_t *)(0x3F202000))
+#define  SDCMD_NEW      (1 << 15)
+#define  SDCMD_FAIL     (1 << 14)
+#define  SDCMD_NORESP   (1 << 10)
+#define  SDCMD_LONGRESP (1 << 9)
+#define  SDCMD_CMD_MASK 0x03FF
+#define SDARG         ((volatile uint32_t *)(0x3F202004))
+#define SDTOUT        ((volatile uint32_t *)(0x3F202008))
+#define SDCDIV        ((volatile uint32_t *)(0x3F20200C))
+#define SDRSP0        ((volatile uint32_t *)(0x3F202010))
+#define SDRSP1        ((volatile uint32_t *)(0x3F202014))
+#define SDRSP2        ((volatile uint32_t *)(0x3F202018))
+#define SDRSP3        ((volatile uint32_t *)(0x3F20201C))
+#define SDHSTS        ((volatile uint32_t *)(0x3F202020))
+#define SDVDD         ((volatile uint32_t *)(0x3F202030))
+#define SDEDM         ((volatile uint32_t *)(0x3F202034))
 #define  SDVDD_POWER_ON  1
 #define  SDVDD_POWER_OFF 0
-#define SDHCFG        ((volatile unsigned int*)(0x3F202038))
-#define SDHBCT        ((volatile unsigned int*)(0x3F20203C))
+#define SDHCFG        ((volatile uint32_t *)(0x3F202038))
+#define SDHBCT        ((volatile uint32_t *)(0x3F20203C))
 #define  HCFG_BUSY_IRPT_EN   0x400
-#define SDDATA        ((volatile unsigned int*)(0x3F202040))
-#define SDHBLC        ((volatile unsigned int*)(0x3F202050))
-
-#define CMD_NEW_FLAG 0x8000
-#define CMD_CMD_MASK 0x03FF
+#define SDDATA        ((volatile uint32_t *)(0x3F202040))
+#define SDHBLC        ((volatile uint32_t *)(0x3F202050))
 
 #define CMD0   0x0000
 #define CMD2   0x0002
 #define CMD8   0x0008
 #define CMD55  0x0037
 #define ACMD41 0x0029
+
+#define SD_OK      0
+#define SD_ERROR  -2
+
+static int32_t sd_err;
 
 uint64_t sdhost_cmd(uint16_t opcode, uint32_t arg)
 {
@@ -104,15 +111,21 @@ uint64_t sdhost_cmd(uint16_t opcode, uint32_t arg)
     // clear error flag
 
     *SDARG = arg;
-    sdcmd = opcode & CMD_CMD_MASK;
+    sdcmd = opcode & SDCMD_CMD_MASK;
+
+    // set flag
+    if (opcode == CMD0 ) { sdcmd |= SDCMD_NORESP; } else
+    if (opcode == CMD2 ) { sdcmd |= SDCMD_LONGRESP; }
 
     // send command
-    *SDCMD = sdcmd | CMD_NEW_FLAG;
+    *SDCMD = sdcmd | SDCMD_NEW;
 
     // wait resp
 
     r = ((uint64_t) *SDRSP1 << 32) | *SDRSP0; 
     uart_puts("resp "); uart_hex(*SDRSP3); uart_putc(' '); uart_hex(*SDRSP2); uart_putc(' '); uart_hex(*SDRSP1); uart_putc(' '); uart_hex(*SDRSP0); uart_putc('\n');
+
+    if (sdcmd & SDCMD_FAIL) { uart_puts("sdcmd fail\n"); sd_err = SD_ERROR; }
 
     return r;
 }
