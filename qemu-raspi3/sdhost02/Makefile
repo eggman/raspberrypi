@@ -14,15 +14,19 @@ kernel.elf: ${OBJ}
 boot.o: boot.S
 	${AS} ${ASM_FLAGS} -c $< -o $@
 
-%.o : %.c Makefile
+%.o: %.c Makefile
 	$(CC) ${CFLAGS} -c -o $*.o $*.c
 
-run :
+run:
 	$(MAKE) kernel.elf
 	qemu-system-aarch64 -M raspi3 -m 128 -serial mon:stdio -nographic -kernel kernel.elf -drive if=sd,id=sd0,format=raw,file=sd.img
 runasm :
 	$(MAKE) kernel.elf
 	qemu-system-aarch64 -M raspi3 -m 128 -serial mon:stdio -nographic -kernel kernel.elf -drive if=sd,id=sd0,format=raw,file=sd.img -d in_asm
+
+trun:
+	$(MAKE) kernel.elf
+	qemu-system-aarch64 -M raspi3 -m 128 -serial mon:stdio -nographic -kernel kernel.elf -drive if=sd,id=sd0,format=raw,file=sd.img -trace events=events
 
 clean:
 	rm -f *.o *.elf *.list
