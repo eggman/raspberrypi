@@ -37,7 +37,6 @@ void uart_puts(const char* str)
 void c_irq_handler(void)
 {
     char c;
-    disable_irq();
     // check inteerupt source
     if (*CORE0_INTERRUPT_SOURCE & (1 << 8)) {
         if (*IRQ_BASIC & (1 << 8)) {
@@ -48,7 +47,6 @@ void c_irq_handler(void)
             }
         }
     }
-    enable_irq();
     return;
 }
 
@@ -57,7 +55,6 @@ void kernel_main(void)
     uart_puts("int02\n");
 
     // enable UART RX interrupt.
-    //*UART0_IMSC = 1 << 4;
     *AUX_ENABLES = 1;
     *AUX_MU_IIR = 6;
     *AUX_MU_IER = 2;

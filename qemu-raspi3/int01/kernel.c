@@ -27,6 +27,7 @@ void uart_puts(const char* str)
         uart_putc((unsigned char)str[i]);
 }
 
+#define IRQ_BASIC   ((volatile uint32_t *)(0x3F00B200))
 #define IRQ_PEND2   ((volatile uint32_t *)(0x3F00B208))
 #define IRQ_ENABLE2 ((volatile uint32_t *)(0x3F00B214))
 #define GPU_INTERRUPTS_ROUTING ((volatile uint32_t *)(0x4000000C))
@@ -35,20 +36,19 @@ void uart_puts(const char* str)
 void c_irq_handler(void)
 {
     char c;
-    disable_irq();
     // check inteerupt source
     if (*CORE0_INTERRUPT_SOURCE & (1 << 8)) {
-        if (*IRQ_PEND2 & (1 << 25)) {
-            if (*UART0_MIS & (1 << 4)) { 
-                c = (unsigned char) *UART0_DR; // read for clear tx interrupt.
-                enable_irq();
-                uart_putc(c);
-                uart_puts(" c_irq_handler\n");
-                return;
+        if (*IRQ_BASIC & (1 << 9)) {
+            if (*IRQ_PEND2 & (1 << 25)) {
+                if (*UART0_MIS & (1 << 4)) {
+                    c = (unsigned char) *UART0_DR; // read for clear tx interrupt.
+                    uart_putc(c);
+                    uart_puts(" c_irq_handler\n");
+                    return;
+                }
             }
         }
     }
-    enable_irq();
     return;
 }
 
