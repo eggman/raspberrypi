@@ -7,7 +7,7 @@ ASM_FLAGS = -mcpu=cortex-a53
 OBJ = boot.o kernel.o asmfunc.o
 
 kernel.elf: ${OBJ}
-	${CC} -T linker.ld -o $@ -ffreestanding -O2 -nostdlib ${OBJ}
+	${CC} -Wl,--build-id=none -T linker.ld -o $@ -ffreestanding -O2 -nostdlib ${OBJ}
 	${OBJDUMP} -D kernel.elf > kernel.list
 
 boot.o: boot.S
