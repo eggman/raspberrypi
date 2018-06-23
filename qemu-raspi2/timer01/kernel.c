@@ -130,22 +130,16 @@ uint32_t read_cntfrq(void)
 
 void c_irq_handler(void)
 {
-    uint32_t cntvct;
-    uint32_t val;
-
-    disable_irq();
     if (read_core0timer_pending() & 0x08 ) {
-        uart_puts("handler CNTV_TVAL: ");
-        val = read_cntv_tval();
-        uart_hex_puts(val);
-
         write_cntv_tval(cntfrq);    // clear cntv interrupt and set next 1sec timer.
 
-        uart_puts("handler CNTVCT   : ");
-        cntvct = read_cntvct();
-        uart_hex_puts( (uint32_t) cntvct & 0xFFFFFFFF);
+        uart_puts("core0timer_pendig : ");
+        uart_hex_puts(read_core0timer_pending());
+        uart_puts("handler CNTV_TVAL : ");
+        uart_hex_puts(read_cntv_tval());
+        uart_puts("handler CNTVCT    : ");
+        uart_hex_puts( (uint32_t) read_cntvct() & 0xFFFFFFFF);
     }
-    enable_irq();
     return;
 }
 
