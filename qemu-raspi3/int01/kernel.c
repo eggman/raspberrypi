@@ -1,3 +1,13 @@
+/*
+ * int01
+ *
+ * BCM2835 ARM Peripherals
+ * https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2835/BCM2835-ARM-Peripherals.pdf
+ *
+ * BCM2836 QA7 ARM Quad A7 core
+ * https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2836/QA7_rev3.4.pdf
+ */
+
 #include <stddef.h>
 #include <stdint.h>
 
