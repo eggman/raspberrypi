@@ -41,18 +41,6 @@ void uart_puthex(uint64_t v)
 }
 
 typedef struct{
-    uint32_t control_status;
-    uint32_t control_block_addr;
-    uint32_t transfer_information;
-    uint32_t source_addr;
-    uint32_t dest_addr;
-    uint32_t tranfer_length;
-    uint32_t stride;
-    uint32_t next_control_block;
-    uint32_t debug;
-} DMA_REG;
-
-typedef struct{
     uint32_t transfer_information;
     uint32_t source_addr;
     uint32_t dest_addr;
@@ -63,13 +51,13 @@ typedef struct{
     uint32_t dummy1;
 } DMA_CONTROLBLOCK __attribute__ ((aligned(32)));
 
-#define DMA_CH_0       (*((volatile DMA_REG *)(0x3F007000)))
+#define DMA_CH0_CTRL   ((volatile uint32_t *)(0x3F007000))
+#define DMA_CH0_ADDR   ((volatile uint32_t *)(0x3F007004))
 #define DMA_ENABLE     ((volatile uint32_t *)(0x3F007FF0))
 #define DMA_INT_STATUS ((volatile uint32_t *)(0x3F007FE0))
 static uint8_t src[256] = "hello world\n";
 static uint8_t dst[256] = { 0 };
 DMA_CONTROLBLOCK dma_control_block;
-
 
 #define IRQ_BASIC   ((volatile uint32_t *)(0x3F00B200))
 #define IRQ_PEND1   ((volatile uint32_t *)(0x3F00B204))
@@ -88,8 +76,8 @@ void c_irq_handler(void)
     if (*CORE0_INTERRUPT_SOURCE & (1 << 8)) {
         if (*IRQ_BASIC & (1 << 8)) {
             if (*IRQ_PEND1 & (1 << 16)) {
-                if (DMA_CH_0.control_status & (1 << 2)) {
-                    DMA_CH_0.control_status |= 1 << 2;    /* clear INT */
+                if (*DMA_CH0_CTRL & (1 << 2)) {
+                    *DMA_CH0_CTRL |= 1 << 2;    /* clear INT */
                     uart_puts(" c_irq_handler\n");
                     uart_puts((const char *) dst);
                     return;
@@ -107,7 +95,7 @@ void kernel_main(void)
     *DMA_INT_STATUS = 0;
     *DMA_ENABLE |= 1 << 0; /* enable DMA ch 0 */
 
-    DMA_CH_0.control_status |= 1 << 31; /* set reset */
+    *DMA_CH0_CTRL |= 1 << 31; /* set reset */
 
     /* setup dma control block */
     dma_control_block.transfer_information = 0;
@@ -127,8 +115,8 @@ void kernel_main(void)
     dma_control_block.transfer_information |= 1 << 0; /* INTEN */
 
     /* kick dma */
-    DMA_CH_0.control_block_addr = (intptr_t) &dma_control_block;
-    DMA_CH_0.control_status |= 1 << 0; /* Active */
+    *DMA_CH0_ADDR = (intptr_t) &dma_control_block;
+    *DMA_CH0_CTRL |= 1 << 0; /* Active */
 
     while (1) {
         io_halt();
