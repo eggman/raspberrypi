@@ -1,3 +1,13 @@
+/*
+ * int02
+ *
+ * BCM2835 ARM Peripherals
+ * https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2835/BCM2835-ARM-Peripherals.pdf
+ *
+ * BCM2836 QA7 ARM Quad A7 core
+ * https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2836/QA7_rev3.4.pdf
+ */
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -17,7 +27,7 @@ static inline void io_halt(void)
 
 void uart_putc(unsigned char c)
 {
-    // Wait for UART to become ready to transmit.
+    /* Wait for UART to become ready to transmit. */
     while ( !(*AUX_MU_LSR & (1 << 5)) ) { }
     *AUX_MU_IO = c;
 }
@@ -37,11 +47,11 @@ void uart_puts(const char* str)
 void c_irq_handler(void)
 {
     char c;
-    // check inteerupt source
+    /* check inteerupt source */
     if (*CORE0_INTERRUPT_SOURCE & (1 << 8)) {
         if (*IRQ_BASIC & (1 << 8)) {
             if (*IRQ_PEND1 & (1 << 29)) {
-                c = *AUX_MU_IO;
+                c = *AUX_MU_IO;  /* read for clear tx interrupt. */
                 uart_putc(c);
                 uart_puts(" c_irq_handler\n");
             }
@@ -54,15 +64,15 @@ void kernel_main(void)
 {
     uart_puts("int02\n");
 
-    // enable UART RX interrupt.
+    /* enable UART RX interrupt. */
     *AUX_ENABLES = 1;
     *AUX_MU_IIR = 6;
     *AUX_MU_IER = 2;
 
-    // UART interrupt routing.
+    /* UART interrupt routing. */
     *IRQ_ENABLE1 = 1 << 29;
 
-    // IRQ routeing to CORE0.
+    /* IRQ routeing to CORE0. */
     *GPU_INTERRUPTS_ROUTING = 0x00;
 
     enable_irq();
