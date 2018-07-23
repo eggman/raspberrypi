@@ -29,7 +29,6 @@ trun :
 	$(MAKE) kernel.elf
 	qemu-system-aarch64 -M raspi3 -m 128 -serial null -serial mon:stdio -nographic -kernel kernel.elf -sd sd.img -trace events=events
 
-r
 clean:
 	rm -f *.o *.elf *.list
 

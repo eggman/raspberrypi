@@ -202,7 +202,7 @@ int32_t sdhci_init(void)
     if(sd_err) return sd_err;
 
 	// set voltage
-    r = sdhci_cmd(CMD5,0);
+    sdhci_cmd(CMD5,0);
  
     // get RCA
     sd_rca = sdhci_cmd(CMD_SEND_REL_ADDR,0);
