@@ -147,6 +147,9 @@ void kernel_main(void)
 {
     uint32_t val;
 
+    uart_puts("timer01 : arm generic timer every 1 sec.\n");
+    uart_puts("exit : Ctrl-A x ,monitor : Ctrl-A c\n\n");
+
     uart_puts("CNTFRQ  : ");
     cntfrq = read_cntfrq();
     uart_hex_puts(cntfrq);

@@ -1,6 +1,27 @@
 
 Raspberry Pi bare metal code.
 
+
+# qemu-raspi2
+
+| name  | about |
+| -------- | ------------- |
+| [framebuffer01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi2/framebuffer01)  | draw framebuffer  |
+| [int01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi2/int01)    | uart rx interrupt handling |
+| [timer01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi2/timer01)  | arm generic timer every 1 secnod  |
+
+# toolchain
+
+```
+$ sudo apt install gcc-arm-none-eabi
+```
+
+```
+$ sudo apt install gcc-aarch64-linux-gnu
+```
+
+# qemu
+
 I use QEMU 4.2 raspi3 model and raspi2 model.
 
 ```

@@ -51,7 +51,8 @@ void c_irq_handler(void)
 
 void kernel_main(void)
 {
-    uart_puts("int01\n");
+    uart_puts("int01 : uart rx interrupt.\n");
+    uart_puts("exit : Ctrl-A x ,monitor : Ctrl-A c\n\n");
 
     // enable UART RX interrupt.
     *UART0_IMSC = 1 << 4;
