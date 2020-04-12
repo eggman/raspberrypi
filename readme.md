@@ -4,11 +4,25 @@ Raspberry Pi bare metal code.
 
 # qemu-raspi2
 
-| name  | about |
+| name     |               |
 | -------- | ------------- |
 | [framebuffer01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi2/framebuffer01)  | draw framebuffer  |
 | [int01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi2/int01)    | uart rx interrupt handling |
 | [timer01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi2/timer01)  | arm generic timer every 1 secnod  |
+
+# qemu-raspi3
+
+| name     |               |
+| -------- | ------------- |
+| [framebuffer01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi3/framebuffer01)  | draw framebuffer  |
+| [int01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi3/int01)       | uart rx interrupt handling |
+| [int02](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi3/int02)       | mini uart rx interrupt handling |
+| [sdhost01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi3/sdhost01) | sdhost initialize |
+| [sdhost02](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi3/sdhost02) | sdhost readblock |
+| [task01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi3/task01)     | task create  |
+| [task02](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi3/task01)     | task switch  |
+| [timer01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi3/timer01)   | arm generic timer every 1 secnod  |
+
 
 # toolchain
 
