@@ -66,7 +66,7 @@ void kernel_main(void)
 
     /* enable UART RX interrupt. */
     *AUX_ENABLES = 1;
-    *AUX_MU_IIR = 6;
+    //*AUX_MU_IIR = 4;
     *AUX_MU_IER = 2;
 
     /* UART interrupt routing. */

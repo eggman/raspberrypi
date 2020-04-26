@@ -14,6 +14,7 @@ Raspberry Pi bare metal code.
 
 | name     |               |
 | -------- | ------------- |
+| [dma01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi3/dma01)       | dma  memory to meory |
 | [framebuffer01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi3/framebuffer01)  | draw framebuffer  |
 | [int01](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi3/int01)       | uart rx interrupt handling |
 | [int02](https://github.com/eggman/raspberrypi/tree/master/qemu-raspi3/int02)       | mini uart rx interrupt handling |

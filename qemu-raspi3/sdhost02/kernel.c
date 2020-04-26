@@ -24,7 +24,7 @@ void uart_puts(const char *str)
 
 void uart_hex(uint64_t n)
 {
-    const char *hexdigits = "0123456789ABSDEF";
+    const char *hexdigits = "0123456789ABCDEF";
     for (int i = 60; i >= 0; i -= 4)
         uart_putc(hexdigits[(n >> i) & 0xf]);
 }
