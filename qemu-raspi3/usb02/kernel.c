@@ -139,7 +139,7 @@ void usbhost_start(void)
     *USB_HOST_HPRT = 1 << 12 | 1 << 3 | 1 << 1; 
 
     // enable channel irq
-    // HAINTMASK.HAINTMsk = 16'b3
+    // HAINTMASK.HAINTMsk = 16'h3
     // HCINTMSK0.XferComplMsk = 1'b1
     *USB_HOST_HAINTMSK   |= 0x3;
     *USB_HOST_HCINTMSK0  |= 1;
@@ -162,7 +162,7 @@ void usbhost_start(void)
      // set dma buffer
     *USB_HOST_HCDMA0   = usb_buffer0;
     *USB_HOST_HCDMA0  |= 0xC0000000;
-     // HCTSIZ0.Pid = 2'b3 (SETUP) , HCTSIZ0.PktCnt = 10'b1 , HCTSIZ0.XferSize = 18'b8
+     // HCTSIZ0.Pid = 2'd3 (SETUP) , HCTSIZ0.PktCnt = 10'h1 , HCTSIZ0.XferSize = 18'd8
     *USB_HOST_HCTSIZ0 = 3 << 29 | 1 << 19 | 8;
      // HCCAR1.ChEna = 1'b1
     *USB_HOST_HCCHAR0 |= 1<<31;
@@ -171,7 +171,7 @@ void usbhost_start(void)
      // set dma buffer
     *USB_HOST_HCDMA1   = usb_buffer1;
     *USB_HOST_HCDMA1  |= 0xC0000000;
-     // HCTSIZ1.Pid = 2'b2 (DATA1) , HCTSIZ1.PktCnt = 10'b1 , HCTSIZ1.XferSize = 18'd64
+     // HCTSIZ1.Pid = 2'd2 (DATA1) , HCTSIZ1.PktCnt = 10'h1 , HCTSIZ1.XferSize = 18'd64
     *USB_HOST_HCTSIZ1  = 2 << 29 | 1 << 19 | 64;
      // HCCAR1.ChEna = 1'b1
     *USB_HOST_HCCHAR1 |= 1<<31;

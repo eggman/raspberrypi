@@ -1,0 +1,9 @@
+
+
+
+usb_*
+usb_desc_*
+usb_hub_*
+usb_dwc2_*
+-usb_dwc2_hr*
+-usb_dwc2_sof
