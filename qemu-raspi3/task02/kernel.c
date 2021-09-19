@@ -1,3 +1,6 @@
+/*
+ * task02 : simple switch task
+ */
 #include <stddef.h>
 #include <stdint.h>
 
@@ -7,8 +10,9 @@ extern void disable_irq(void);
 extern void switch_task(uint64_t **prev_task_top_of_stack, uint64_t **next_task_top_of_stack);
 void task_b(void);
 
-uint64_t *task_b_top_of_stack;
-int32_t  switch_flg = 0;
+static uint64_t *task_a_top_of_stack;
+static uint64_t *task_b_top_of_stack;
+static int32_t  switch_flg = 0;
 
 static inline void io_halt(void)
 {
@@ -177,10 +181,6 @@ uint64_t *setup_task_b_stack(void)
     return p;
 }
 
-
-uint64_t *task_a_top_of_stack;
-uint64_t *task_b_top_of_stack;
-
 void task_b(void)
 {
     for (;;) {
@@ -198,8 +198,8 @@ void task_b(void)
 
 void kernel_main(void)
 {
-
-    uart_puts("task01\n");
+    uart_puts("qemu exit: Ctrl-A x / qemu monitor: Ctrl-A c\n");
+    uart_puts("task02\n");
 
     // enable UART RX interrupt.
     *UART0_IMSC = 1 << 4;

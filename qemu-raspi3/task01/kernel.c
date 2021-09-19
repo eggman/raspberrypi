@@ -1,3 +1,6 @@
+/*
+ * task01 : simple start another task.
+ */
 #include <stddef.h>
 #include <stdint.h>
 
@@ -87,8 +90,8 @@ void c_irq_handler(void)
                 enable_irq();
                 uart_putc(c);
                 uart_puts(" c_irq_handler\n");
-    uart_puthex(get_sp()); uart_putc('\n');
-    switch_flg = 1;
+                uart_puthex(get_sp()); uart_putc('\n');
+                switch_flg = 1; // set task_b start flag
                 return;
             }
         }
@@ -192,6 +195,7 @@ void kernel_main(void)
 {
     uint64_t *task_b_top_of_stack;
 
+    uart_puts("qemu exit: Ctrl-A x / qemu monitor: Ctrl-A c\n");
     uart_puts("task01\n");
 
     // enable UART RX interrupt.
