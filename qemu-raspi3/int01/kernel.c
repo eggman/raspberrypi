@@ -4,6 +4,9 @@
  * BCM2835 ARM Peripherals
  * https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2835/BCM2835-ARM-Peripherals.pdf
  *
+ * BCM2835 datasheet errata
+ * https://elinux.org/BCM2835_datasheet_errata
+ *
  * BCM2836 QA7 ARM Quad A7 core
  * https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2836/QA7_rev3.4.pdf
  */
@@ -64,6 +67,7 @@ void c_irq_handler(void)
 
 void kernel_main(void)
 {
+    uart_puts("qemu exit: Ctrl-A x / qemu monitor: Ctrl-A c\n");
     uart_puts("int01\n");
 
     // enable UART RX interrupt.

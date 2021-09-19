@@ -1,8 +1,11 @@
 /*
- * int02
+ * int02 : mini uart rx interrupt
  *
  * BCM2835 ARM Peripherals
  * https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2835/BCM2835-ARM-Peripherals.pdf
+ *
+ * BCM2835 datasheet errata
+ * https://elinux.org/BCM2835_datasheet_errata
  *
  * BCM2836 QA7 ARM Quad A7 core
  * https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2836/QA7_rev3.4.pdf
@@ -62,12 +65,13 @@ void c_irq_handler(void)
 
 void kernel_main(void)
 {
+    uart_puts("qemu exit: Ctrl-A x / qemu monitor: Ctrl-A c\n");
     uart_puts("int02\n");
 
     /* enable UART RX interrupt. */
     *AUX_ENABLES = 1;
     //*AUX_MU_IIR = 4;
-    *AUX_MU_IER = 2;
+    *AUX_MU_IER = 1;
 
     /* UART interrupt routing. */
     *IRQ_ENABLE1 = 1 << 29;
