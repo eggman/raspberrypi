@@ -5,13 +5,13 @@ This program only supports QEMU raspi3 model, and does not work on real hardware
 
 ```
 $ make run
-qemu-system-aarch64 -M raspi3 -m 128 -serial mon:stdio -nographic -kernel kernel.elf
+qemu-system-aarch64 -M raspi3 -m 1024 -serial mon:stdio -nographic -kernel kernel.elf
+qemu exit: Ctrl-A x / qemu monitor: Ctrl-A c
+timer01
 CNTFRQ  : 0x3B9ACA0
-CNTV_TVAL: 0x3B73210
-handler CNTV_TVAL: 0xFFFB877F
-handler CNTVCT   : 0x3CAB4AE
-handler CNTV_TVAL: 0xFFFEAC90
-handler CNTVCT   : 0x7856987
-handler CNTV_TVAL: 0xFFFDC488
-handler CNTVCT   : 0xB41BD99
+CNTV_TVAL: 0x3B97F82
+handler CNTV_TVAL: 0xFFFDFFCB
+handler CNTVCT   : 0x3C18444
+handler CNTV_TVAL: 0xFFFE14A5
+handler CNTVCT   : 0x77D3EEA
 ```

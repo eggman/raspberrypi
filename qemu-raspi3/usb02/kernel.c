@@ -1,3 +1,7 @@
+/*
+ * usb02.c : USB packet tx / rx and display GET_DESCRIPTOR result
+ */
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -15,6 +19,14 @@ static inline void enable_irq(void)
 
 #define AUX_MU_IO   ((volatile uint32_t *)(0x3F215040))
 #define AUX_MU_LSR  ((volatile uint32_t *)(0x3F215054))
+
+void my_memcpy(void *dest, void *src, size_t n) {
+   char *src_char = (char *)src;
+   char *dest_char = (char *)dest;
+   for (size_t i=0; i<n; i++) {
+       dest_char[i] = src_char[i];
+   }
+}
 
 void uart_putchar(uint8_t c)
 {
@@ -64,8 +76,8 @@ void uart_puthex(uint64_t v)
 #define USB_HOST_HCTSIZ1       ((volatile uint32_t *)(0x530 + USB_BASE))
 #define USB_HOST_HCDMA1        ((volatile uint32_t *)(0x534 + USB_BASE))
 
-uint8_t usb_buffer0[1024*16];
-uint8_t usb_buffer1[1024*16];
+uint8_t usb_buffer0[256] = {0};
+uint8_t usb_buffer1[256] = {0};
 
 struct UsbDeviceRequest {
     uint8_t Type;
@@ -114,6 +126,27 @@ void usbhost_id(void)
     uart_putchar('\n');
 }
 
+static void txrx_control_msg(uint8_t txlen)
+{
+    // send setup & control packet
+     // set dma buffer
+    *USB_HOST_HCDMA0   = (uint64_t) usb_buffer0;
+    *USB_HOST_HCDMA0  |= 0xC0000000;
+     // HCTSIZ0.Pid = 2'd3 (SETUP) , HCTSIZ0.PktCnt = 10'h1 , HCTSIZ0.XferSize = 18'd8
+    *USB_HOST_HCTSIZ0 = 3 << 29 | 1 << 19 | txlen;
+     // HCCAR1.ChEna = 1'b1
+    *USB_HOST_HCCHAR0 |= 1<<31;
+
+    // recieve control packet
+     // set dma buffer
+    *USB_HOST_HCDMA1   = (uint64_t) usb_buffer1;
+    *USB_HOST_HCDMA1  |= 0xC0000000;
+     // HCTSIZ1.Pid = 2'd2 (DATA1) , HCTSIZ1.PktCnt = 10'h1 , HCTSIZ1.XferSize = 18'd64
+    *USB_HOST_HCTSIZ1  = 2 << 29 | 1 << 19 | 64;
+     // HCCAR1.ChEna = 1'b1
+    *USB_HOST_HCCHAR1 |= 1<<31;
+}
+
 void usbhost_start(void)
 {
     uint32_t count = 0;
@@ -149,32 +182,24 @@ void usbhost_start(void)
     *USB_HOST_HCCHAR0   |= 0x40;            // OUT
     *USB_HOST_HCCHAR1   |= 1 << 15 | 0x40;  // IN
 
-    // build packet
-    memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
-                                .Type = 0x80,     // DEVICE_TO_HOST | STDANDAD | DEVICE
+}
+
+void send_packet(void)
+{
+    // HCCAR1.EPDir = 1'b0 (OUT) / 1'b01(IN), HCCAR1.MPS = 11'h40
+    *USB_HOST_HCCHAR0   |= 0x40;            // OUT
+    *USB_HOST_HCCHAR1   |= 1 << 15 | 0x40;  // IN
+
+   // build packet
+    my_memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
+                                .Type = 0xA0,     // DEVICE_TO_HOST | STDANDAD | DEVICE
                                 .Request = 0x06,  // GET_DESCRIPTOR
                                 .Value = 0x0100,  // descriptor.type = 0x01, decriptor.index = 0x00
                                 .Index = 0,
                                 .Length = 64,
                       }, 8);
 
-    // send setup & control packet
-     // set dma buffer
-    *USB_HOST_HCDMA0   = usb_buffer0;
-    *USB_HOST_HCDMA0  |= 0xC0000000;
-     // HCTSIZ0.Pid = 2'd3 (SETUP) , HCTSIZ0.PktCnt = 10'h1 , HCTSIZ0.XferSize = 18'd8
-    *USB_HOST_HCTSIZ0 = 3 << 29 | 1 << 19 | 8;
-     // HCCAR1.ChEna = 1'b1
-    *USB_HOST_HCCHAR0 |= 1<<31;
-
-    // recieve control packet
-     // set dma buffer
-    *USB_HOST_HCDMA1   = usb_buffer1;
-    *USB_HOST_HCDMA1  |= 0xC0000000;
-     // HCTSIZ1.Pid = 2'd2 (DATA1) , HCTSIZ1.PktCnt = 10'h1 , HCTSIZ1.XferSize = 18'd64
-    *USB_HOST_HCTSIZ1  = 2 << 29 | 1 << 19 | 64;
-     // HCCAR1.ChEna = 1'b1
-    *USB_HOST_HCCHAR1 |= 1<<31;
+    txrx_control_msg(8);
 }
 
 void intc_setup(void)
@@ -190,18 +215,21 @@ void intc_setup(void)
 
 void kernel_main(void)
 {
+    uart_puts("qemu exit: Ctrl-A x / qemu monitor: Ctrl-A c\n");
     uart_puts("usb02\n");
     uart_puts("usb_buffer0:");
-    uart_puthex(usb_buffer0);
+    uart_puthex((uint64_t)usb_buffer0);
     uart_puts("\n");
     uart_puts("usb_buffer1:");
-    uart_puthex(usb_buffer1);
+    uart_puthex((uint64_t)usb_buffer1);
     uart_puts("\n");
 
     intc_setup();
 
     usbhost_id();
     usbhost_start();
+
+    send_packet();
 
     uart_puts("GET_DESCRIPTOR\n");
     for (int i = 0; i < 18; i++) {

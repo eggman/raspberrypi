@@ -1,7 +1,7 @@
-CROSS_COMPILE = aarch64-linux-gnu-
-CC = ${CROSS_COMPILE}gcc
-AS = ${CROSS_COMPILE}as
-OBJDUMP = ${CROSS_COMPILE}objdump
+CROSS_COMPILE = aarch64-none-elf
+CC = ${CROSS_COMPILE}-gcc
+AS = ${CROSS_COMPILE}-as
+OBJDUMP = ${CROSS_COMPILE}-objdump
 CFLAGS =  -mcpu=cortex-a53 -fpic -ffreestanding -std=gnu99 -O2 -Wall -Wextra
 ASM_FLAGS = -mcpu=cortex-a53 
 OBJ = boot.o kernel.o

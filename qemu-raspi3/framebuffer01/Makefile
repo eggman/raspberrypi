@@ -1,4 +1,4 @@
-CROSS = aarch64-linux-gnu
+CROSS = aarch64-none-elf
 CC = ${CROSS}-gcc
 AS = ${CROSS}-as
 OBJDUMP = ${CROSS}-objdump
@@ -19,11 +19,11 @@ boot.o: boot.S
 
 run :
 	$(MAKE) kernel.elf
-	qemu-system-aarch64 -M raspi3 -m 128 -serial null -kernel kernel.elf
+	qemu-system-aarch64 -M raspi3 -m 1024 -serial null -kernel kernel.elf
 
 runasm :
 	$(MAKE) kernel.elf
-	qemu-system-aarch64 -M raspi3 -m 128 -serial mon:stdio -kernel kernel.elf -d in_asm
+	qemu-system-aarch64 -M raspi3 -m 1024 -serial mon:stdio -kernel kernel.elf -d in_asm
 
 clean:
 	rm -f *.o *.elf *.list

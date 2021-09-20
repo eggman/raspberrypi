@@ -1,3 +1,6 @@
+/*
+ * timer01 : simple generic timer
+ */
 #include <stddef.h>
 #include <stdint.h>
 
@@ -149,6 +152,9 @@ void c_irq_handler(void)
 void kernel_main(void)
 {
     uint32_t val;
+
+    uart_puts("qemu exit: Ctrl-A x / qemu monitor: Ctrl-A c\n");
+    uart_puts("timer01\n");
 
     uart_puts("CNTFRQ  : ");
     cntfrq = read_cntfrq();

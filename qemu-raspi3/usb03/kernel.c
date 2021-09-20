@@ -1,14 +1,22 @@
 /*
- * usb03.c
+ * usb03.c : USB enumuration
  */
 
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
 #include <stdarg.h>
 
-static void *memset(void *s, int c, size_t n)
+void my_memcpy(void *dest, void *src, size_t n) {
+   int i;
+   char *src_char = (char *)src;
+   char *dest_char = (char *)dest;
+   for (i=0; i<n; i++) {
+       dest_char[i] = src_char[i];
+   }
+}
+
+static void *my_memset(void *s, int c, size_t n)
 {
     const uint8_t uc = c % 0xff;
     uint8_t  *p = (uint8_t *)s;
@@ -259,7 +267,7 @@ static void usbhost_poll_intr(void)
 {
 	uint8_t dev   = 2;
 
-    memset(usb_buffer3, 0, 1024);
+    my_memset(usb_buffer3, 0, 256);
 
     // HCCAR3.EPType = 2'b11 (Interupt), HCCAR3.EPDir = 1'b01(IN), HCCAR3.MPS = 11'h40
     *USB_HOST_HCCHAR3   |= 3 << 18 | 1 << 15 | 1 << 11 | 0x40;  // IN
@@ -283,8 +291,8 @@ static void usbhost_poll_intr(void)
 
 static void prepare_control_msg(void)
 {
-    memset(usb_buffer0, 0, 1024);
-    memset(usb_buffer1, 0, 1024);
+    my_memset(usb_buffer0, 0, 256);
+    my_memset(usb_buffer1, 0, 256);
 
     // HCCAR1.EPDir = 1'b0 (OUT) / 1'b01(IN), HCCAR1.MPS = 11'h40
     *USB_HOST_HCCHAR0   |= 0x40;            // OUT
@@ -325,7 +333,7 @@ void usbhost_get_descriptor(uint8_t dev, uint8_t descriptor_type, bool is_hub)
     *USB_HOST_HCCHAR1   |= dev << 22; 
 
     // build packet
-    memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
+    my_memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
                                 .Type = is_hub ? 0xA0 : 0x80,     // DEVICE_TO_HOST | STANDARD | DEVICE
                                 .Request = 0x06,  // GET_DESCRIPTOR
                                 .Value = descriptor_type << 8 | 0x00,  // descriptor.type = 0x01, decriptor.index = 0x00
@@ -344,7 +352,7 @@ void usbhost_get_portstatus(uint8_t dev, uint8_t port,  bool is_hub)
     *USB_HOST_HCCHAR1   |= dev << 22; 
 
     // build packet
-    memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
+    my_memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
                                 .Type = is_hub ? 0xA3 : 0x80,     // DEVICE_TO_HOST | CLASS or STANDARD | DEVICE
                                 .Request = 0x00,  // GET_STATUS
                                 .Index = port,
@@ -365,7 +373,7 @@ void usbhost_set_address(uint8_t address)
 	prepare_control_msg();
 
     // build packet
-    memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
+    my_memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
 			                    .Type = 0,
 			                    .Request = 5,		// Set address request
                       	        .Value = address,	// Address to set
@@ -382,7 +390,7 @@ void usbhost_set_config(uint8_t dev, uint8_t config)
     *USB_HOST_HCCHAR1   |= dev << 22; 
 
     // build packet
-    memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
+    my_memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
 			                    .Type = 0,
 			                    .Request = 9,		// Set config
                       	        .Value = config,	// Address to set
@@ -400,7 +408,7 @@ void usbhost_set_portfeature(uint8_t dev, uint8_t port,  uint16_t feature)
     *USB_HOST_HCCHAR1   |= dev << 22;
 
     // build packet
-    memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
+    my_memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
                                 .Type = 0x23,     // ??
                                 .Request = 0x03,  // SET_FEATURE
                                 .Value = (uint16_t)feature,                             // Feature we are changing
@@ -419,7 +427,7 @@ void usbhost_clear_portfeature(uint8_t dev, uint8_t port, uint16_t feature)
     *USB_HOST_HCCHAR1   |= dev << 22;
 
     // build packet
-    memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
+    my_memcpy(usb_buffer0, &(struct UsbDeviceRequest) {
                                 .Type = 0x23,     // ??
                                 .Request = 0x01,  // CLEAR_FEATURE
                                 .Value = feature,
@@ -431,6 +439,7 @@ void usbhost_clear_portfeature(uint8_t dev, uint8_t port, uint16_t feature)
 } 
 void kernel_main(void)
 {
+    uart_puts("qemu exit: Ctrl-A x / qemu monitor: Ctrl-A c\n");
     uart_puts("usb03\n");
     uart_printf("usb_buffer0: %02x\n", usb_buffer0);
     uart_printf("usb_buffer1: %02x\n", usb_buffer1);
