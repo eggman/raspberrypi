@@ -30,22 +30,17 @@ Raspberry Pi bare metal code.
 
 # toolchain
 
-```
-$ sudo apt install gcc-arm-none-eabi
-```
-
-```
-$ sudo apt install gcc-aarch64-linux-gnu
-```
+arm and aarch64 toolchain ( arm-none-eabi and aarch64-none-elf)
+* https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
 
 # qemu
 
-I use QEMU 4.2 raspi3 model and raspi2 model.
+I use QEMU 6.1.0 raspi2 model and raspi3 model.
 
 ```
-$ qemu-system-aarch64 -m 128 -M raspi3 -nographic -kernel kernel.elf
+$ qemu-system-arm -m 1024 -M raspi2 -nographic -kernel kernel.elf
 ```
 
 ```
-$ qemu-system-arm -m 128 -M raspi2 -nographic -kernel kernel.elf
+$ qemu-system-aarch64 -m 1024 -M raspi3 -nographic -kernel kernel.elf
 ```

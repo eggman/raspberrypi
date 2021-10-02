@@ -1,3 +1,6 @@
+/*
+ * sdhost01.c : sdhost init sdcard
+ */
 #include <stddef.h>
 #include <stdint.h>
 
@@ -174,6 +177,7 @@ void sdhost_init(void)
 
 void kernel_main(void)
 {
+    uart_puts("qemu exit: Ctrl-A x / qemu monitor: Ctrl-A c\n");
     uart_puts("sdhost01\n");
 
     sdhost_init();

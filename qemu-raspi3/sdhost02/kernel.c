@@ -1,3 +1,6 @@
+/*
+ * sdhost02.c :  read 1st sector from sdcard
+ */
 #include <stddef.h>
 #include <stdint.h>
 
@@ -258,6 +261,7 @@ void sdhost_readblock(void)
 
 void kernel_main(void)
 {
+    uart_puts("qemu exit: Ctrl-A x / qemu monitor: Ctrl-A c\n");
     uart_puts("sdhost02\n");
 
     sdhost_init();
